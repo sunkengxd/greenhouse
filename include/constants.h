@@ -5,6 +5,10 @@
 
 #define DHT_TYPE DHT11
 
+#define RED    0
+#define GREEN  0
+#define BLUE 255
+
 const float v400 = 4.535;   // 400 ppm
 const float v40000 = 3.206; // 40k ppm
 
