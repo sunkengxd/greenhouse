@@ -2,12 +2,12 @@
 #include <arduino-timer.h>
 #include "pins.h"
 #include "constants.h"
-#include <LiquidCrystal_I2C.h>
+#include <rgb_lcd.h>
 #include <DHT.h>
 #include <DHT_U.h>
 
 Timer<4> timer; // 4 tasks
-LiquidCrystal_I2C lcd(0x27, 16, 2);
+rgb_lcd lcd;
 DHT dht(DHT_PIN, DHT_TYPE);
 
 int temperature = 0,
@@ -28,13 +28,13 @@ bool check_sensors(void *) {
 }
 
 bool relay_control(void *) {
-  temperature < TEMPERATURE_THRESHOLD ? digitalWrite(COOLER_RELAY, HIGH) : digitalWrite(COOLER_RELAY, LOW);
+  temperature < TEMPERATURE_THRESHOLD ? digitalWrite(COOLER, HIGH) : digitalWrite(COOLER, LOW);
 
-  humidity < HUMIDITY_THRESHOLD ? digitalWrite(VENT_RELAY, HIGH) : digitalWrite(VENT_RELAY, LOW);
+  humidity < HUMIDITY_THRESHOLD ? digitalWrite(VENT, HIGH) : digitalWrite(VENT, LOW);
 
-  moisture < MOISTURE_THRESHOLD ? digitalWrite(WATER_PUMP_RELAY, HIGH) : digitalWrite(WATER_PUMP_RELAY, LOW);
+  moisture < MOISTURE_THRESHOLD ? digitalWrite(WATER_PUMP, HIGH) : digitalWrite(WATER_PUMP, LOW);
 
-  co2 > CO2_THRESHOLD ? digitalWrite(AIR_PUMP_RELAY, HIGH) : digitalWrite(AIR_PUMP_RELAY, LOW);
+  co2 > CO2_THRESHOLD ? digitalWrite(AIR_PUMP, HIGH) : digitalWrite(AIR_PUMP, LOW);
 
   return true;
 }
@@ -100,24 +100,23 @@ void setup() {
   Serial.begin(9600);
 
   dht.begin();
-  co2_sensor.begin(v400, v40000);
 
-  lcd.init();
-  lcd.backlight();
+  lcd.begin(16, 2);
+  lcd.setRGB(rED, GREEN, BLUE);
   lcd.setCursor(0, 0);
 
-  pinMode(LAMP_RELAY, OUTPUT);
-  pinMode(WATER_PUMP_RELAY, OUTPUT);
-  pinMode(COOLER_RELAY, OUTPUT);
-  pinMode(VENT_RELAY, OUTPUT);
-  pinMode(AIR_PUMP_RELAY, OUTPUT);
+  pinMode(LAMP, OUTPUT);
+  pinMode(WATER_PUMP, OUTPUT);
+  pinMode(COOLER, OUTPUT);
+  pinMode(VENT, OUTPUT);
+  pinMode(AIR_PUMP, OUTPUT);
   
   pinMode(NEXT_BUTTON, INPUT_PULLUP);
   pinMode(BACK_BUTTON, INPUT_PULLUP);
   
   timer.every(2000, check_sensors);
   timer.every(2000, relay_control);
-  timer.every(LAMP_PERIOD, switch_lamp);
+  //timer.every(LAMP_PERIOD, switch_lamp);
   timer.every(SEND_PERIOD, send_data);
 }
 
